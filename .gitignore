@@ -1,0 +1,20 @@
+.env
+myenv
+data/cache
+log
+*.pt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+
+analysis/best_mod
+analysis/ps
+simulation/ps
+simulation/best_mod
+simulation/scripts_test
+simulation/result
+simulation/scripts
