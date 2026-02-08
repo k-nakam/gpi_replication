@@ -26,6 +26,10 @@ class TarNetBase(nn.Module):
         ):
         '''
         Class for TarNet model (PyTorch). First layer is Transformer architecture
+        This module builds a shared representation network (z) and two outcome heads
+        for potential outcomes Y(0) and Y(1). The representation network learns a
+        latent feature vector that feeds both heads, mirroring the TarNet design.
+        Each head is a feedforward stack specified by sizes_y, while the shared stack is specified by sizes_z.
 
         Args:
             sizes_z: tuple, size of hidden layers for shared representation
@@ -46,7 +50,13 @@ class TarNetBase(nn.Module):
         torch.nn.init.xavier_normal_(self.epsilon.weight)
 
     def _build_model(self, sizes: tuple, dropout: float) -> nn.Sequential:
-        # create model by nn.Sequential
+        """
+        Build a feedforward stack based on provided layer sizes.
+
+        The final activation is removed to allow the last layer to output raw
+        values (e.g., outcome prediction or latent representation), while keeping
+        intermediate non-linearities and optional dropout/batch norm.
+        """
         layers = []
         for out_size in sizes:
             layers.append(nn.LazyLinear(out_features=out_size))
@@ -67,7 +77,15 @@ class TarNetBase(nn.Module):
             self, 
             inputs: torch.Tensor
         ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-        
+        """
+        Forward pass that returns both potential outcomes and the representation.
+
+        Returns:
+        - y0: predicted outcome under control
+        - y1: predicted outcome under treatment
+        - eps: legacy epsilon head (unused in current loss)
+        - z: shared representation before the outcome heads
+        """
         z = self.model_z(inputs)
         z_trans = nn.functional.relu(z)
         y0 = self.model_y0(z_trans)
@@ -77,7 +95,12 @@ class TarNetBase(nn.Module):
 
 def dml_score(t, y, tpred, ypred1, ypred0) -> np.ndarray:
     '''
-    Calculate influence function for the average treatment effect
+    Calculate influence function for the average treatment effect.
+
+    This is the doubly robust (AIPW) score used in DML-style estimation.
+    It combines outcome regression residuals with propensity weighting
+    to produce an unbiased score under correct specification of either
+    the propensity model or outcome models.
 
     Args:
     - t: np.ndarray or torch.Tensor, treatment
@@ -118,7 +141,11 @@ def estimate_psi_split(
     ) -> tuple[np.ndarray, np.ndarray]:
 
     '''
-    Estimate Propensity Score from latent representation with cross-fitting
+    Estimate Propensity Score from latent representation with cross-fitting.
+
+    The function splits the sample into two folds, fits a propensity model
+    on one fold and predicts on the other, then swaps. This ensures the
+    propensity estimates used in the influence function are out-of-fold.
 
     Args:
     - fr: np.ndarray or torch.Tensor, latent representation
@@ -219,7 +246,11 @@ def TarNet_loss(
         y1_pred: torch.Tensor,
     ) -> torch.Tensor:
     '''
-    Calculate loss function for TarNet with Pertubation
+    Calculate loss function for TarNet.
+
+    The loss is the sum of squared errors for the observed treatment group:
+    - For control units, compare y_true to y0_pred
+    - For treated units, compare y_true to y1_pred
     
     Args:
     - y_true: torch.Tensor, true outcome

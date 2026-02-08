@@ -27,7 +27,11 @@ from TNutil import (
 
 def save_filename(filename: str, foldername: str) -> str:
     '''
-    Function to find the filename without overwriting
+    Helper function to find the filename without overwriting.
+
+    If a file already exists, increment a counter until an unused
+    filename is found (e.g., name(1).csv, name(2).csv).
+    This is used to save propensity score data without overwriting previous files.
     '''
     counter = 1
     new_filename = filename
@@ -128,7 +132,10 @@ class TarNet:
             t_test: Union[np.ndarray, torch.Tensor],
         ):
         '''
-        Create dataloader for training and validation
+        Create dataloader for training and validation.
+
+        This converts numpy inputs to tensors, reshapes y/t to column vectors,
+        and constructs randomized train and sequential validation loaders.
 
         Args:
         - r_train: np.array or torch.Tensor, training data for internal representation
@@ -162,7 +169,11 @@ class TarNet:
             plot_loss: bool = True,
         ):
         '''
-        Fit the TarNet model
+        Fit the TarNet model.
+
+        The input is split into train/validation data, and the network is trained
+        with early stopping based on validation loss. The best checkpoint is
+        optionally saved and reloaded after training.
 
         Args:
         - R: np.array or torch.Tensor, internal representation
@@ -239,7 +250,9 @@ class TarNet:
 
     def validate_step(self) -> torch.Tensor:
         '''
-        Method to Validate the model
+        Method to validate the model.
+
+        Runs a forward pass over the validation loader and returns the mean loss.
         '''
         valid_loss = []
         with torch.no_grad():
@@ -262,7 +275,10 @@ class TarNet:
 
     def predict(self, r: Union[np.ndarray, torch.Tensor]) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         '''
-        Predict method for TarNet
+        Predict method for TarNet.
+
+        Returns batch-wise predictions for potential outcomes and the shared
+        representation (fr). Useful for downstream ATE estimation.
 
         Args:
         r: np.ndarray or torch.Tensor, internal representation
@@ -323,7 +339,8 @@ def estimate_k(
         verbose: bool = True,
     ) -> tuple[float, float, float]:
     '''
-    The function estimates the ATE using TarNet and returns the estimated ATE, standard deviation, and the validation loss (with k-fold cross-fitting)
+    The function estimates the ATE using TarNet and returns the estimated ATE,
+    standard deviation, and the validation loss (with k-fold cross-fitting)
     
     Args:
     - R: list or np.ndarray, list of covariates (obtained from the hidden states)

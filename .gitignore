@@ -3,6 +3,7 @@ myenv
 data/cache
 log
 *.pt
+.Rhistory
 
 # Python
 __pycache__/
@@ -18,3 +19,7 @@ simulation/best_mod
 simulation/scripts_test
 simulation/result
 simulation/scripts
+
+ps_save.csv
+.DS_Store
+*tar.gz

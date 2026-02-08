@@ -112,7 +112,7 @@ If your purpose is not to replicate the paper exactly but just want to use our p
 
 When you replicate the analysis, you need to create the directory to save the hidden states. Please refer to each shellscript (otherwise the coder will produce the error).
 
-In addition, the slight difference in the computational environment (GPU and GPU driver) might lead to the difference in logit, which can cause the difference in the generated texts (this can be the problem of replicating `create_data/create_text.py` in the different environment). While the use of CPU can solve this problem, this is infeasible due to the computation time. Therefore, for the replication purpose, we also provide the generated texts (see `data/simulation/prompt_repeat.csv`).
+In addition, the slight difference in the computational environment (GPU and GPU driver) might lead to the difference in logit, which can cause the difference in the generated texts (this can be the problem of replicating `create_data/create_text.py` in the different environment). While the use of CPU can solve this problem, this is infeasible due to the computation time. Therefore, for the replication purpose, we also provide the generated texts (see `data/simulation/prompt_repeat.csv`). We also share the hidden states in our [Dataverse repository](https://doi.org/10.7910/DVN/2DZQ6T), allowing others to replicate our results without performing this process.
 
 
 ## How to use LLaMa3 checkpoint (if you need to replicate exactly)
